@@ -24,18 +24,6 @@ const DestinationAndDateHeader: React.FC<IProps> = ({ trip }) => {
           <Calendar className="size-5 text-zinc-400" />
           <span className="text-zinc-100">{displayedDate}</span>
         </div>
-
-        <div className="w-px h-6 bg-zinc-800" />
-
-        <Button
-          variant="secondary"
-          onClick={() => {
-            alert("Essa função nunca sequer existiu. De onde tiraram isso?");
-          }}
-        >
-          Alterar local/data
-          <Settings2 className="size-5" />
-        </Button>
       </div>
     </div>
   );
