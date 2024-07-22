@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import api from "@base/shared/api";
 import { ITrip } from "@base/types/ITrip";
+import Head from "next/head";
 
 const CreateTripPage: React.FC = () => {
   // Hook Form
@@ -91,6 +92,10 @@ const CreateTripPage: React.FC = () => {
 
   return (
     <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+      <Head>
+        <title>Plann.er - Planejador de viagens</title>
+      </Head>
+
       <form
         className="max-w-3xl w-full px-6 text-center space-y-10"
         onSubmit={handleSubmit(onSubmit)}
