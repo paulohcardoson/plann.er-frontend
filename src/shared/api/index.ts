@@ -11,13 +11,16 @@ export class API {
   private async sendRequest<T>(path: string, init?: RequestInit): Promise<T> {
     const url = new URL(path, this.baseURL);
     const response = await fetch(url, init);
-    const data = await response.json();
 
     if (!response.ok) {
+      const data: ApiError = await response.json();
+
       throw new ApiError(data.message, response.status);
     }
 
-    return data as T;
+    const text = await response.text();
+
+    return text.length > 0 ? JSON.parse(text) : text;
   }
 
   async get<T>(path: string, init?: RequestInit) {
