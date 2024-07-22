@@ -12,6 +12,11 @@ import Button from "@base/components/Button";
 // Types
 import { IProps } from "./types/props";
 import { IFormInputs, schema } from "./types/form";
+import { toast } from "react-toastify";
+import {
+  ICreateTripParticipantRequest,
+  TCreateTripParticipantResponse,
+} from "@base/shared/api/requests/trips/participants/index.post";
 
 const CreateParticipantModal: React.FC<IProps> = ({
   isOpen,
@@ -27,21 +32,38 @@ const CreateParticipantModal: React.FC<IProps> = ({
     },
   });
 
-  const onSubmit: SubmitHandler<IFormInputs> = async ({ email }) => {
-    if (participants.some((participant) => participant.email === email)) {
-      return setError("email", { message: "Email was already invited" });
+  const createParticipant = async (data: ICreateTripParticipantRequest) => {
+    return await api.post<TCreateTripParticipantResponse>(
+      `/trips/${trip.id}/invites`,
+      data
+    );
+  };
+
+  const onSubmit: SubmitHandler<IFormInputs> = async (data) => {
+    try {
+      const email = data.email.trim();
+
+      if (participants.some((participant) => participant.email === email)) {
+        return toast.warn("Este usuário já foi convidado");
+      }
+
+      await createParticipant({ email });
+
+      addParticipant({
+        email,
+        id: email,
+        name: null,
+        is_confirmed: false,
+      });
+
+      reset();
+
+      return toast.success(
+        `Pessoa convidada com sucesso. Um email de confirmação para ${email} chegará em breve.`
+      );
+    } catch (error: any) {
+      return toast.error(error.message);
     }
-
-    await api.post(`/trips/${trip.id}/invites`, { email });
-
-    addParticipant({
-      email,
-      id: email,
-      name: null,
-      is_confirmed: false,
-    });
-
-    reset();
   };
 
   return (

@@ -13,6 +13,11 @@ import Button from "@base/components/Button";
 import { IProps } from "./types/props";
 import { IFormInputs, schema } from "./types/form";
 import { ILink } from "@base/types/ILink";
+import {
+  ICreateTripLinkRequest,
+  ICreateTripLinkResponse,
+} from "@base/shared/api/requests/trips/links/index.post";
+import { toast } from "react-toastify";
 
 const CreateLinkModal: React.FC<IProps> = ({
   isOpen,
@@ -20,7 +25,7 @@ const CreateLinkModal: React.FC<IProps> = ({
   trip,
   addLink,
 }) => {
-  const { register, handleSubmit } = useForm<IFormInputs>({
+  const { register, handleSubmit, reset } = useForm<IFormInputs>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: "",
@@ -28,20 +33,29 @@ const CreateLinkModal: React.FC<IProps> = ({
     },
   });
 
-  const onSubmit: SubmitHandler<IFormInputs> = async ({ title, url }) => {
-    const { linkId: id } = await api.post<{ linkId: ILink["id"] }>(
+  const createLink = async (data: ICreateTripLinkRequest) => {
+    return await api.post<ICreateTripLinkResponse>(
       `/trips/${trip.id}/links`,
-      {
+      data
+    );
+  };
+
+  const onSubmit: SubmitHandler<IFormInputs> = async ({ title, url }) => {
+    try {
+      const data = await createLink({ title, url });
+
+      addLink({
+        id: data.linkId,
         title,
         url,
-      }
-    );
+      });
 
-    addLink({
-      id,
-      title,
-      url,
-    });
+      reset();
+
+      return toast.success("Link adicionado com sucesso");
+    } catch (error: any) {
+      return toast.error(error.message);
+    }
   };
 
   return (

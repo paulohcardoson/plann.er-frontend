@@ -13,6 +13,13 @@ import Button from "@base/components/Button";
 import { IProps } from "./types/props";
 import { IFormInputs, schema } from "./types/form";
 import { IActivity } from "@base/types/IActivity";
+import {
+  ICreateTripActivityRequest,
+  ICreateTripActivityResponse,
+} from "@base/shared/api/requests/trips/activities/index.post";
+import { title } from "process";
+import { toast } from "react-toastify";
+import ApiError from "@base/shared/api/errors/ApiError";
 
 const CreateActivityModal: React.FC<IProps> = ({
   isOpen,
@@ -27,19 +34,32 @@ const CreateActivityModal: React.FC<IProps> = ({
     },
   });
 
+  const createActivity = async (data: ICreateTripActivityRequest) => {
+    return await api.post<ICreateTripActivityResponse>(
+      `/trips/${trip.id}/activities`,
+      data
+    );
+  };
+
   const onSubmit: SubmitHandler<IFormInputs> = async ({ title, occurs_at }) => {
-    const data: any = await api.post(`/trips/${trip.id}/activities`, {
-      title,
-      occurs_at,
-    });
+    try {
+      const activity = await createActivity({
+        title: title,
+        occurs_at: occurs_at.toISOString(),
+      });
 
-    addActivity({
-      id: data.activityId,
-      title,
-      occurs_at: occurs_at.toISOString(),
-    });
+      addActivity({
+        id: activity.activityId,
+        title: title,
+        occurs_at: occurs_at.toISOString(),
+      });
 
-    reset();
+      reset();
+
+      return toast.success("Atividade adicionada com sucesso.");
+    } catch (error: any) {
+      return toast.error(error.message);
+    }
   };
 
   return (
