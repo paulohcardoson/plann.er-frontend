@@ -15,10 +15,11 @@ import { useRouter } from "next/router";
 import api from "@base/shared/api";
 import { ITrip } from "@base/types/ITrip";
 import Head from "next/head";
+import { toast } from "react-toastify";
 
 const CreateTripPage: React.FC = () => {
   // Hook Form
-  const { control, handleSubmit } = useForm<IFormInputs>({
+  const { control, handleSubmit, reset } = useForm<IFormInputs>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       destination: "",
@@ -84,7 +85,14 @@ const CreateTripPage: React.FC = () => {
 
     try {
       const trip = await createTrip(data);
-      router.push(`/trips/${trip.id}`);
+
+      reset();
+
+      toast.success("Viagem criada com sucesso", {
+        onClose: (props) => {
+          router.push(`/trips/${trip.id}`);
+        },
+      });
     } catch (err) {
       return;
     }
